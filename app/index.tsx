@@ -7,7 +7,7 @@ import { useRouter } from 'expo-router'
 import * as SecureStore from 'expo-secure-store'
 import { StatusBar } from 'expo-status-bar'
 import { useEffect } from 'react'
-import { Image, Text, TouchableOpacity, View } from 'react-native'
+import { Text, TouchableOpacity, View } from 'react-native'
 // Images
 import { makeRedirectUri, useAuthRequest } from 'expo-auth-session'
 
@@ -66,7 +66,8 @@ export default function App() {
   return (
     <View className="flex-1 items-center justify-center bg-gray-900 px-8 py-10">
       <View className="flex-1 items-center justify-center gap-6">
-        <Image source={Logo} />
+        <Logo />
+
         <View className="space-y-2">
           <Text className="font-tile text-center text-2xl leading-tight text-gray-50">
             Sua Cápsula do tempo
