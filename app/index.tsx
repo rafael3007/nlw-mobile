@@ -1,20 +1,63 @@
-import { StatusBar } from 'expo-status-bar'
-import { Image, Text, TouchableOpacity, View } from 'react-native'
-
 import {
   Roboto_400Regular,
   Roboto_700Bold,
   useFonts,
 } from '@expo-google-fonts/roboto'
-
+import { useRouter } from 'expo-router'
+import * as SecureStore from 'expo-secure-store'
+import { StatusBar } from 'expo-status-bar'
+import { useEffect } from 'react'
+import { Image, Text, TouchableOpacity, View } from 'react-native'
 // Images
-import Logo from './assets/logo.svg'
+import { makeRedirectUri, useAuthRequest } from 'expo-auth-session'
+
+import Logo from '../src/assets/logo.svg'
+import { api } from '../src/lib/api'
+
+const discovery = {
+  authorizationEndpoint: 'https://github.com/login/oauth/authorize',
+  tokenEndpoint: 'https://github.com/login/oauth/access_token',
+  revocationEndpoint:
+    'https://github.com/settings/connection/applications/Iv1.5900431533a75ed8',
+}
 
 export default function App() {
+  const router = useRouter()
+
   const [hasLoadedFonts] = useFonts({
     Roboto_400Regular,
     Roboto_700Bold,
   })
+
+  const [request, response, signInWithGithub] = useAuthRequest(
+    {
+      clientId: 'Iv1.5900431533a75ed8',
+      scopes: ['identity'],
+      redirectUri: makeRedirectUri({
+        scheme: 'nlwspacetime',
+      }),
+    },
+    discovery,
+  )
+
+  async function handleGithubOAuthCode(code: string) {
+    const response = await api.post('/register', {
+      code,
+    })
+
+    const { token } = response.data
+
+    await SecureStore.setItemAsync('token', token)
+
+    router.push('/memories')
+  }
+
+  useEffect(() => {
+    if (response?.type === 'success') {
+      const { code } = response.params
+      handleGithubOAuthCode(code)
+    }
+  }, [response])
 
   if (!hasLoadedFonts) {
     return null
@@ -37,6 +80,7 @@ export default function App() {
         <TouchableOpacity
           activeOpacity={0.7}
           className="rounded-full bg-green-500 px-5 py-2"
+          onPress={() => signInWithGithub()}
         >
           <Text className="font-title text-sm uppercase text-black">
             Cadastrar Lembrança
